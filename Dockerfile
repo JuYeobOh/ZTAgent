@@ -2,13 +2,11 @@ FROM mcr.microsoft.com/playwright/python:v1.52.0-noble
 
 WORKDIR /app
 
-# 의존성 설치
+# 소스를 먼저 복사 (editable install은 src/가 존재해야 동작)
 COPY pyproject.toml .
-RUN pip install --no-cache-dir -e .
-
-# 소스 복사
 COPY src/ src/
 COPY tools/ tools/
+RUN pip install --no-cache-dir -e .
 
 # EXPOSE 없음 — outbound only
 
