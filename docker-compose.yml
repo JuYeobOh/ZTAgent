@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  employee-agent:
+    image: employee-agent:latest
+    restart: unless-stopped
+    shm_size: "2gb"
+    environment:
+      EMPLOYEE_ID: ${EMPLOYEE_ID}
+      LOCATION_ID: ${LOCATION_ID}
+      WORKER_GROUP: ${WORKER_GROUP}
+      CONTROLLER_URL: ${CONTROLLER_URL}
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_MODEL: ${LLM_MODEL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_DAILY_BUDGET_USD: ${LLM_DAILY_BUDGET_USD:-5.0}
+      BROWSER_HEADLESS: "true"
+      TZ: "Asia/Seoul"
+    volumes:
+      - ./data/profiles/${EMPLOYEE_ID}:/app/profile
+      - ./data/results/${EMPLOYEE_ID}:/app/results
+      - ./data/logs/${EMPLOYEE_ID}:/app/logs
+    # ports: 없음 — outbound only

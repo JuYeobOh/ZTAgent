@@ -1,0 +1,6 @@
+BUDGET_EXCEEDED = "budget_exceeded"
+CIRCUIT_OPEN = "circuit_open"
+TASK_STARTED = "task_started"
+TASK_COMPLETED = "task_completed"
+TASK_FAILED = "task_failed"
+TASK_SKIPPED = "task_skipped"
