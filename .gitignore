@@ -23,6 +23,7 @@ test-data/
 .omc/
 .omx/
 .claude/
+plan.md
 
 # IDE
 .vscode/

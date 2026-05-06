@@ -45,7 +45,27 @@ async def run_day(
         for task in tasks:
             if not skip_wait:
                 await wait_until(task.scheduled_at)
-            await run_task(task, cfg, client, browser_session=browser_session)
+            try:
+                await run_task(task, cfg, client, browser_session=browser_session)
+            except asyncio.CancelledError:
+                # 시스템 종료 신호: 즉시 전파
+                raise
+            except Exception as e:
+                log.warning(
+                    "task_failed_continue",
+                    run_task_id=task.run_task_id,
+                    task_type=task.task_type,
+                    site=task.site,
+                    module=task.module,
+                    action=task.action,
+                    error=repr(e),
+                )
+                # clock_in 실패는 치명적 — 인증 없이 work 진행 무의미. 그날 종료.
+                if task.task_type == "clock_in":
+                    log.error("clock_in_failed_aborting_day", run_task_id=task.run_task_id)
+                    break
+                # work / clock_out 실패는 다음 task로 계속 진행.
+                # 다음 task의 _prepare_for_work이 reload+자동 로그인으로 자연스럽게 복구.
     finally:
         await browser_session.stop()
         log.info("browser_stopped")
@@ -61,9 +81,19 @@ async def main() -> None:
     while True:
         try:
             plan = await client.get_today_plan(cfg.EMPLOYEE_ID, cfg.LOCATION_ID)
-            logger.info("plan_received",
-                        should_work_here=plan.should_work_here,
-                        task_count=len(plan.tasks))
+            # plan 풀 dump → /app/logs/agent_YYYYMMDD.jsonl 에 한 줄로 떨어짐
+            # → 호스트 /data/zt/logs/{loc}/{eid}/ → 매시간 S3 sync로 들어감
+            logger.info(
+                "plan_received",
+                work_date=plan.work_date,
+                should_work_here=plan.should_work_here,
+                requested_location_id=plan.requested_location_id,
+                assigned_location_id=plan.assigned_location_id,
+                clock_in_at=plan.clock_in_at.isoformat() if plan.clock_in_at else None,
+                clock_out_at=plan.clock_out_at.isoformat() if plan.clock_out_at else None,
+                task_count=len(plan.tasks),
+                tasks=[t.model_dump(mode="json") for t in plan.tasks],
+            )
 
             if not plan.should_work_here or not plan.tasks:
                 logger.info("no_work_today")

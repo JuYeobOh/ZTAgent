@@ -150,33 +150,11 @@ async def run_task(
             await reporter.succeed(metadata={"task_type": "clock_out"})
 
         elif task.task_type == "work":
-            # DMS(Nextcloud 기반): browser-use navigate_to 사용 금지 (3s SPA 타임아웃 → session reset)
-            # Playwright가 browser-use의 active page(=pages[0])에 직접 navigate + 결정론적 로그인.
-            # 새 탭을 만들지 않아 browser-use가 보는 page와 일치.
-            if task.site == "dms":
-                try:
-                    pw, _browser, ctx = await _playwright_context_from_session(browser_session)
-                    try:
-                        pages = ctx.pages
-                        pl_page = pages[0] if pages else await ctx.new_page()
-                        auth = KeycloakAuthHelper(ctx, cfg)
-                        await auth.login_dms(pl_page)
-                        await pl_page.bring_to_front()
-                        log.info("navigated_to_site", site=task.site, url=SITE_HOME_URLS["dms"])
-                    finally:
-                        await pw.stop()
-                except Exception as e:
-                    log.warning("dms_login_failed", error=repr(e))
-
-            else:
-                # GroupOffice 등 일반 site: browser-use navigate_to 사용
-                home_url = SITE_HOME_URLS.get(task.site or "")
-                if home_url:
-                    try:
-                        await browser_session.navigate_to(home_url)
-                        log.info("navigated_to_site", site=task.site, url=home_url)
-                    except Exception:
-                        pass
+            # 모든 work task 시작 전: page reload + auth URL 감지 + 자동 재로그인
+            try:
+                await _prepare_for_work(task, cfg, log, browser_session)
+            except Exception as e:
+                log.warning("prepare_for_work_failed", error=repr(e))
 
             result = await _do_work(task, cfg, client, log, browser_session)
             await client.upload_result(
@@ -229,6 +207,76 @@ async def _playwright_context_from_session(browser_session: "BrowserSession"):
     contexts = browser.contexts
     ctx = contexts[0] if contexts else await browser.new_context(ignore_https_errors=True)
     return pw, browser, ctx
+
+
+async def _prepare_for_work(
+    task: TaskItem, cfg: Settings, log: object, browser_session: "BrowserSession"
+) -> None:
+    """모든 work task 시작 전 결정론적 진입 보장:
+    1. browser-use가 보는 active page(pages[0])를 site home으로 reload(같은 host) 또는 navigate(다른 host).
+    2. URL이 auth.kmuinfosec.click(=keycloak)으로 redirect됐으면 자동 재로그인.
+       - redirect_uri를 보고 dms/groupoffice 자동 판별 (KeycloakAuthHelper.auto_login).
+    3. 새 탭을 만들지 않으므로 browser-use가 보는 page와 항상 일치.
+    """
+    import urllib.parse as _urlp
+
+    site = task.site
+    home_url = SITE_HOME_URLS.get(site or "")
+    if not home_url:
+        return
+
+    pw, _browser, ctx = await _playwright_context_from_session(browser_session)
+    try:
+        pages = ctx.pages
+        pl_page = pages[0] if pages else await ctx.new_page()
+
+        # 같은 host면 reload, 아니면 navigate
+        try:
+            cur_host = _urlp.urlparse(pl_page.url).netloc
+            tgt_host = _urlp.urlparse(home_url).netloc
+            same_host = cur_host == tgt_host
+        except Exception:
+            same_host = False
+
+        try:
+            if same_host:
+                await pl_page.reload(wait_until="networkidle", timeout=20000)
+            else:
+                await pl_page.goto(home_url, wait_until="networkidle", timeout=20000)
+        except Exception as e:
+            log.warning("pre_work_navigate_failed", error=repr(e))  # type: ignore[attr-defined]
+
+        # site home에 안전하게 도착했는지 검증 — 도착하지 못했으면 결정론적 로그인.
+        # (auth.~, dms.~/login, 그 외 어중간한 상태 모두 한 번에 처리)
+        def _arrived_at_home(u: str, s: str | None) -> bool:
+            try:
+                p = _urlp.urlparse(u)
+                if "auth." in p.netloc:
+                    return False
+                if s == "dms":
+                    return "dms.kmuinfosec.click" in p.netloc and "/login" not in p.path
+                if s == "groupoffice":
+                    return "group.kmuinfosec.click" in p.netloc
+            except Exception:
+                pass
+            return False
+
+        if not _arrived_at_home(pl_page.url, site):
+            log.info("auth_required_detected", url=pl_page.url, site=site)  # type: ignore[attr-defined]
+            try:
+                # task.site를 명시 — _detect_site fallback에 의존하지 않음
+                await KeycloakAuthHelper(ctx, cfg).auto_login(pl_page, site=site)
+            except Exception as e:
+                log.warning("auto_relogin_failed", error=repr(e))  # type: ignore[attr-defined]
+
+        try:
+            await pl_page.bring_to_front()
+        except Exception:
+            pass
+
+        log.info("ready_for_work", site=site, url=pl_page.url)  # type: ignore[attr-defined]
+    finally:
+        await pw.stop()
 
 
 async def _do_clock_in(
