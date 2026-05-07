@@ -3,7 +3,7 @@ import asyncio
 from employee_agent.config import Settings
 from employee_agent.controller_client import ControllerClient, DailyPlan
 from employee_agent.observability.logger import init_json_logger, get_logger
-from employee_agent.scheduler import wait_until, sleep_until_next_0630_kst
+from employee_agent.scheduler import wait_until, sleep_until_next_fetch
 from employee_agent.runner import run_task
 
 import employee_agent.sites.groupoffice  # noqa: F401
@@ -97,15 +97,15 @@ async def main() -> None:
 
             if not plan.should_work_here or not plan.tasks:
                 logger.info("no_work_today")
-                await sleep_until_next_0630_kst()
+                await sleep_until_next_fetch(cfg.PLAN_FETCH_HOUR, cfg.PLAN_FETCH_MINUTE)
                 continue
 
             await run_day(cfg, client, plan)
-            await sleep_until_next_0630_kst()
+            await sleep_until_next_fetch(cfg.PLAN_FETCH_HOUR, cfg.PLAN_FETCH_MINUTE)
 
         except asyncio.CancelledError:
             logger.info("agent_cancelled")
             raise
         except Exception as e:
             logger.error("main_loop_error", error=repr(e))
-            await asyncio.sleep(60)
+            await asyncio.sleep(cfg.ERROR_RETRY_SECONDS)

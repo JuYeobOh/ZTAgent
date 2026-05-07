@@ -17,4 +17,13 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_DAILY_BUDGET_USD: float = 10.0
 
+    # ── 운영 다이얼 ──────────────────────────────────────
+    # Plan fetch 시각 (KST). Controller의 daily plan 생성 시각보다 늦어야 한다.
+    # 운영 기본: 06:30 (Controller가 06:00에 plan 생성).
+    # 테스트 시: PLAN_FETCH_HOUR=1, PLAN_FETCH_MINUTE=10 식으로 override.
+    PLAN_FETCH_HOUR: int = 6
+    PLAN_FETCH_MINUTE: int = 30
+    # main loop가 예외로 빠졌을 때 다음 시도까지 sleep
+    ERROR_RETRY_SECONDS: int = 60
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
