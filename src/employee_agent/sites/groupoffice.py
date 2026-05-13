@@ -241,9 +241,9 @@ _ACTION_TEMPLATES: dict[str, dict] = {
 
     "notes.create_note": {
         "templates": [
-            "Click the global '+' button and choose '노트'. Enter the title '{title}' and write a body of about 1000 Korean characters about your current work. In the notebook selector, choose '{notebook}' — this is your notebook based on your account (team or personal). Save. Done when the note is created.",
-            "Click the '노트' tab, then click the add button in the toolbar to create a new note. Set the title to '{title}', write a detailed body of about 1000 Korean characters, and select '{notebook}' as the target notebook (your department team folder or your personal folder). Save. Done when saved.",
-            "Navigate to 노트 via the top nav. Use the toolbar to create a new note called '{title}'. Select '{notebook}' as the notebook (look for your department name or your personal folder name). Write a body of about 1000 Korean characters and save. Done when the note appears in the list under that notebook.",
+            "Click the global '+' button located in the TOP-RIGHT HEADER (the icon-only '+' in the app top bar, near the profile avatar / apps grid — NOT any '+' in the left sidebar or the center column). From the menu that appears, choose '노트'. In the note editor, enter the title '{title}' and write a body of about 1000 Korean characters about your current work. In the notebook selector, choose '{notebook}' — your team or personal notebook. Save. Done when the note is created.",
+            "Click the '노트' tab in the top navigation. The page shows three columns: (left) 노트북 list, (center) note list, (right) note body. In the LEFT column, click '{notebook}' to activate it (your department team folder or personal folder). Then in the CENTER column toolbar, click the green button whose visible text is 'Add' (a single button containing both a '+' icon and the word 'Add'). Do NOT click: the icon-only '+' next to '노트북' in the left sidebar (creates a new NOTEBOOK), the icon-only '+' next to 'Filters' (creates a filter), or the global '+' in the top-right header. Set the title to '{title}', write a detailed body of about 1000 Korean characters, and confirm the target notebook is '{notebook}'. Save. Done when saved.",
+            "Navigate to 노트 via the top navigation. In the center column toolbar, locate and click the green button labeled 'Add' (DOM cue: a button element whose visible inner text contains 'Add', sitting in the note-list column header) to create a new note called '{title}'. Select '{notebook}' as the notebook (look for your department name or your personal folder name in the left notebook panel). Other '+' icons on the page open different dialogs (sidebar '노트북' '+' = new notebook, 'Filters' '+' = new filter, header '+' = global menu) and must not be used. Write a body of about 1000 Korean characters and save. Done when the note appears in the list under that notebook.",
         ],
         "params": {"title": ["업무 메모", "회의 기록", "아이디어", "체크리스트", "진행 현황", "참고 사항"]},
         "max_steps": 15,
@@ -251,9 +251,9 @@ _ACTION_TEMPLATES: dict[str, dict] = {
 
     "notes.create_or_edit_note": {
         "templates": [
-            "Click the global '+' button and choose '노트'. Enter the title '{title}' and write a body of about 1000 Korean characters. Save. Done when saved.",
-            "Click the '노트' tab and create a new note titled '{title}' using the toolbar add button. Write a detailed body of about 1000 Korean characters and save. Done when the note is saved.",
-            "Navigate to 노트 and use the new note button to create a note called '{title}'. Add a body of about 1000 Korean characters and save. Done when saved.",
+            "Click the global '+' button in the TOP-RIGHT HEADER (the icon-only '+' in the app top bar near the profile avatar — NOT the '+' in the left sidebar or center column) and choose '노트' from the menu. Enter the title '{title}' and write a body of about 1000 Korean characters. Save. Done when saved.",
+            "Click the '노트' tab. In the CENTER column toolbar, click the green button whose visible text is 'Add' (the button contains both a '+' icon and the word 'Add'). Do NOT use the icon-only '+' next to '노트북' in the left sidebar (= new notebook) or the icon-only '+' next to 'Filters' (= new filter). Create a new note titled '{title}', write a detailed body of about 1000 Korean characters, and save. Done when the note is saved.",
+            "Navigate to 노트 via the top nav. Use the green 'Add'-labeled button in the center column toolbar (DOM cue: button with visible inner text 'Add') to create a note called '{title}' — ignore any icon-only '+' buttons elsewhere on the page (header global '+', sidebar 노트북 '+', sidebar Filters '+'). Add a body of about 1000 Korean characters and save. Done when saved.",
         ],
         "params": {"title": ["업무 메모", "회의 기록", "아이디어", "체크리스트"]},
         "max_steps": 15,
