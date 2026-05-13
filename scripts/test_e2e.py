@@ -105,7 +105,7 @@ TASKS: list[TaskItem] = [
 
     # ── GroupOffice: 노트 ─────────────────────────────────────
     # _t("groupoffice", "notes",        "view_notes"),
-    # _t("groupoffice", "notes",        "create_note"),
+    _t("groupoffice", "notes",        "create_note"),
     # _t("groupoffice", "notes",        "create_or_edit_note"),
     # _t("groupoffice", "notes",        "comment_note"),
     # _t("groupoffice", "notes",        "manage_notebook"),
@@ -120,8 +120,8 @@ TASKS: list[TaskItem] = [
     # _t("dms", "files",   "view_recent"),
     # _t("dms", "files",   "view_favorites"),
     # _t("dms", "files",   "browse_directory"),
-    # _t("dms", "files",   "upload_file"),
-    _t("dms", "files",   "create_folder"),
+    _t("dms", "files",   "upload_file"),
+    # _t("dms", "files",   "create_folder"),
     # _t("dms", "files",   "rename_file"),
     # _t("dms", "files",   "move_file"),
     # _t("dms", "files",   "team_folder_browse"),

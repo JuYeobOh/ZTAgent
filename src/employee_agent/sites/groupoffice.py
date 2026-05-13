@@ -241,9 +241,9 @@ _ACTION_TEMPLATES: dict[str, dict] = {
 
     "notes.create_note": {
         "templates": [
-            "Click the global '+' button and choose '노트'. Enter the title '{title}' and write a few lines about your current work. In the notebook selector, choose '{notebook}' — this is your notebook based on your account (team or personal). Save. Done when the note is created.",
-            "Click the '노트' tab, then click the add button in the toolbar to create a new note. Set the title to '{title}', write a brief body, and select '{notebook}' as the target notebook (your department team folder or your personal folder). Save. Done when saved.",
-            "Navigate to 노트 via the top nav. Use the toolbar to create a new note called '{title}'. Select '{notebook}' as the notebook (look for your department name or your personal folder name). Write a short body and save. Done when the note appears in the list under that notebook.",
+            "Click the global '+' button and choose '노트'. Enter the title '{title}' and write a body of about 1000 Korean characters about your current work. In the notebook selector, choose '{notebook}' — this is your notebook based on your account (team or personal). Save. Done when the note is created.",
+            "Click the '노트' tab, then click the add button in the toolbar to create a new note. Set the title to '{title}', write a detailed body of about 1000 Korean characters, and select '{notebook}' as the target notebook (your department team folder or your personal folder). Save. Done when saved.",
+            "Navigate to 노트 via the top nav. Use the toolbar to create a new note called '{title}'. Select '{notebook}' as the notebook (look for your department name or your personal folder name). Write a body of about 1000 Korean characters and save. Done when the note appears in the list under that notebook.",
         ],
         "params": {"title": ["업무 메모", "회의 기록", "아이디어", "체크리스트", "진행 현황", "참고 사항"]},
         "max_steps": 15,
@@ -251,9 +251,9 @@ _ACTION_TEMPLATES: dict[str, dict] = {
 
     "notes.create_or_edit_note": {
         "templates": [
-            "Click the global '+' button and choose '노트'. Enter the title '{title}' and write a brief body. Save. Done when saved.",
-            "Click the '노트' tab and create a new note titled '{title}' using the toolbar add button. Write a short body and save. Done when the note is saved.",
-            "Navigate to 노트 and use the new note button to create a note called '{title}'. Add a few lines and save. Done when saved.",
+            "Click the global '+' button and choose '노트'. Enter the title '{title}' and write a body of about 1000 Korean characters. Save. Done when saved.",
+            "Click the '노트' tab and create a new note titled '{title}' using the toolbar add button. Write a detailed body of about 1000 Korean characters and save. Done when the note is saved.",
+            "Navigate to 노트 and use the new note button to create a note called '{title}'. Add a body of about 1000 Korean characters and save. Done when saved.",
         ],
         "params": {"title": ["업무 메모", "회의 기록", "아이디어", "체크리스트"]},
         "max_steps": 15,
