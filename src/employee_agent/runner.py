@@ -28,6 +28,19 @@ SITE_HOME_URLS: dict[str, str] = {
 TerminalStatus = Literal["succeeded", "failed", "skipped"]
 
 
+class BrowserUseGoalNotAchieved(RuntimeError):
+    """browser-use Agent가 max_steps 안에 goal을 달성 못함.
+
+    steps=0이면 단 한 step도 만들지 못함 → CDP screenshot/DOM 캡처 깨짐 의심
+    (BrowserSession 재생성으로 회복 가능).
+    steps>0이면 LLM이 풀지 못한 정상 실패 (세션 재생성과 무관).
+    """
+
+    def __init__(self, message: str, *, steps: int) -> None:
+        super().__init__(message)
+        self.steps = steps
+
+
 class _StatusReporter:
     """Context manager: __aexit__에서 정확히 1회 terminal status 보고."""
 
@@ -173,9 +186,10 @@ async def run_task(
             # browser_use Agent 자체 판정이 실패면 태스크 실패 처리
             if not result.metadata.get("is_successful", True):
                 await reporter.fail("browser_use_goal_not_achieved")
-                raise RuntimeError(
+                raise BrowserUseGoalNotAchieved(
                     f"browser_use: goal not achieved "
-                    f"(final_result={result.metadata.get('final_result')!r})"
+                    f"(final_result={result.metadata.get('final_result')!r})",
+                    steps=int(result.metadata.get("steps", 0) or 0),
                 )
 
             await reporter.succeed(metadata={

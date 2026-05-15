@@ -25,5 +25,9 @@ class Settings(BaseSettings):
     PLAN_FETCH_MINUTE: int = 30
     # main loop가 예외로 빠졌을 때 다음 시도까지 sleep
     ERROR_RETRY_SECONDS: int = 60
+    # work task가 N회 연속 실패하면 BrowserSession을 stop/start로 재생성.
+    # Chrome screenshot/CDP가 일과 중 깨지면 세션 공유 구조상 회복 못 하므로 자가 회복용.
+    # 0이면 기능 비활성화. 1은 일시적 LLM 실패도 즉시 재시작하므로 비추천. 기본 2.
+    CONSECUTIVE_WORK_FAILURE_THRESHOLD: int = 2
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
